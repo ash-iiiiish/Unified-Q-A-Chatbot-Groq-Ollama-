@@ -1,4 +1,3 @@
-
 # Unified Q&A Chatbot (Groq & Ollama)
 
 ## Overview
