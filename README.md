@@ -41,7 +41,7 @@ Unified-Q-A-Chatbot-Groq-Ollama--main/
 
 ### Setup
 ```bash
-git clone https://github.com/your-username/Unified-Q-A-Chatbot-Groq-Ollama.git
+git clone https://github.com/ash-iiiiish/Unified-Q-A-Chatbot-Groq-Ollama-
 cd Unified-Q-A-Chatbot-Groq-Ollama
 pip install -r requirements.txt
 ```
