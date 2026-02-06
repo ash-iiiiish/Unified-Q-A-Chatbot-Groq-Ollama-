@@ -7,6 +7,8 @@ This project is designed for experimentation, comparison, and flexible deploymen
 
 ---
 
+![Demo-picture](image/image.png)
+
 ## Features
 - 🔁 Unified interface for multiple LLM backends
 - ⚡ Groq API integration for fast inference
