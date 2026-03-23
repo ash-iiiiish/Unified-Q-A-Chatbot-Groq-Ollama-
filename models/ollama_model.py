@@ -5,6 +5,7 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_community.chat_message_histories import ChatMessageHistory
 
 
+# ── Session store ──────────────────────────────────────────────────────────────
 _session_store: dict[str, ChatMessageHistory] = {}
 
 
@@ -14,6 +15,7 @@ def get_session_history(session_id: str) -> ChatMessageHistory:
     return _session_store[session_id]
 
 
+# ── Model & Chain ──────────────────────────────────────────────────────────────
 llm = ChatOllama(
     model="gemma3",
     temperature=0.3,
@@ -22,7 +24,7 @@ llm = ChatOllama(
 prompt = ChatPromptTemplate.from_messages([
     (
         "system",
-        "You are Lumina, a refined and helpful AI assistant. "
+        "You are a helpful AI assistant. "
         "Provide clear, thoughtful, and concise answers.",
     ),
     MessagesPlaceholder(variable_name="history"),
@@ -39,6 +41,7 @@ chat_chain = RunnableWithMessageHistory(
 )
 
 
+# ── Public API ─────────────────────────────────────────────────────────────────
 def get_ollama_answer(question: str, session_id: str) -> str:
     return chat_chain.invoke(
         {"question": question},

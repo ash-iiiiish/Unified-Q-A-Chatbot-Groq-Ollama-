@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
@@ -5,9 +8,17 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.outputs import LLMResult
-from dotenv import load_dotenv
 
-load_dotenv()
+# ── Load .env from the same folder as this file (works regardless of cwd) ──────
+load_dotenv(dotenv_path=Path(__file__).parent / ".env", override=True)
+
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+if not GROQ_API_KEY:
+    raise EnvironmentError(
+        "GROQ_API_KEY not found. "
+        "Make sure a .env file with GROQ_API_KEY=gsk_... exists in the project folder."
+    )
+
 
 # ── Token Counter Callback ─────────────────────────────────────────────────────
 class TokenCounterCallback(BaseCallbackHandler):
@@ -17,7 +28,6 @@ class TokenCounterCallback(BaseCallbackHandler):
         self.last_call_tokens: int = 0
 
     def on_llm_end(self, response: LLMResult, **kwargs) -> None:
-        """Extract total_tokens from Groq's llm_output metadata."""
         try:
             usage = (response.llm_output or {}).get("token_usage", {})
             self.last_call_tokens = int(usage.get("total_tokens", 0))
@@ -25,7 +35,7 @@ class TokenCounterCallback(BaseCallbackHandler):
             self.last_call_tokens = 0
 
 
-# ── Shared callback instance (module-level, reused across calls) ───────────────
+# ── Shared callback instance ───────────────────────────────────────────────────
 _token_counter = TokenCounterCallback()
 
 # ── Session store ──────────────────────────────────────────────────────────────
@@ -42,13 +52,14 @@ def get_session_history(session_id: str) -> ChatMessageHistory:
 llm = ChatGroq(
     model="llama-3.1-8b-instant",
     temperature=0.3,
+    api_key=GROQ_API_KEY,        # ← explicit key, no env-lookup ambiguity
     callbacks=[_token_counter],
 )
 
 prompt = ChatPromptTemplate.from_messages([
     (
         "system",
-        "You are Lumina, a refined and helpful AI assistant. "
+        "You are a helpful AI assistant. "
         "Provide clear, thoughtful, and concise answers.",
     ),
     MessagesPlaceholder(variable_name="history"),
@@ -72,7 +83,7 @@ def get_chatgroq_answer(question: str, session_id: str) -> tuple[str, int]:
         answer      – the model's text response
         tokens_used – total tokens consumed by this single call
     """
-    _token_counter.last_call_tokens = 0          # reset before each call
+    _token_counter.last_call_tokens = 0
     answer = chat_chain.invoke(
         {"question": question},
         config={"configurable": {"session_id": session_id}},
