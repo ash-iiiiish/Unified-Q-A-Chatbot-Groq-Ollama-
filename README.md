@@ -114,7 +114,3 @@ You can easily add support for new LLM providers by:
 ## License
 This project is licensed under the MIT License. Feel free to use, modify, and distribute.
 
-## Acknowledgements
-- Streamlit
-- Groq
-- Ollama
